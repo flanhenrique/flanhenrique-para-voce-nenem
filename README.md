@@ -4,6 +4,8 @@ Uma pequena aventura romântica em pixel art, feita por Henrique.
 
 Use os botões na tela, as setas ou WASD para encontrar cinco corações. Depois, encontre o outro personagem perto da lua. O botão de som controla a música e os efeitos. A melodia instrumental é original e sintetizada no navegador.
 
+[Jogar Para Você, Neném ♡](https://flanhenrique.github.io/flanhenrique-para-voce-nenem/)
+
 ## Rodar localmente
 
 Execute `python3 -m http.server 8000` na raiz e visite `http://localhost:8000/`.
