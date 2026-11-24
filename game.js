@@ -7,11 +7,11 @@ const ctx = scene.getContext('2d');
 const finale = $('#together').getContext('2d');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const hearts = [
-  { x: 66, y: 241, message: 'Se nosso encontro fosse planejado, talvez eu não tivesse conhecido você.' },
-  { x: 66, y: 161, message: 'E quem diria que conhecer você viria em dobro?' },
-  { x: 160, y: 174, message: 'Podemos ter pouco tempo para nos ver, mas sempre aproveitamos cada minuto.' },
-  { x: 251, y: 238, message: 'E, como você me disse, você não é qualquer cara.' },
-  { x: 251, y: 154, message: 'A cada encontro nosso, sinto como se fosse o primeiro.' },
+  { x: 66, y: 241, photo: '01', alt: 'Nós dois lado a lado com máscaras faciais.', message: 'Se nosso encontro fosse planejado, talvez eu não tivesse conhecido você.' },
+  { x: 66, y: 161, photo: '02', alt: 'De óculos escuros, segurando um cachorro no colo.', message: 'E quem diria que conhecer você viria em dobro?' },
+  { x: 160, y: 174, photo: '03', alt: 'À mesa, mostrando um prato com peixe e limão.', message: 'Podemos ter pouco tempo para nos ver, mas sempre aproveitamos cada minuto.' },
+  { x: 251, y: 238, photo: '04', alt: 'Nós dois em uma selfie no espelho.', message: 'E, como você me disse, você não é qualquer cara.' },
+  { x: 251, y: 154, photo: '05', alt: 'Nós dois sentados juntos à mesa perto da janela.', message: 'A cada encontro nosso, sinto como se fosse o primeiro.' },
 ];
 const obstacles = [{ x: 105, y: 207 }, { x: 213, y: 210 }, { x: 159, y: 246 }];
 const partner = { x: 160, y: 127 };
@@ -288,6 +288,9 @@ function collect(h) {
   $('.meter').textContent = Array.from({ length: 5 }, (_, i) => i < count ? '♥' : '♡').join(' ');
   if (count === 5) $('#hint').textContent = 'Agora encontre seu neném perto da lua.';
   $('#message').textContent = h.message;
+  const photo = $('#memory-photo');
+  photo.alt = h.alt;
+  photo.src = 'fotos/' + h.photo + '.jpg';
   burst(h.x, h.y - 12, 13);
   chime([76, 81, 88]);
   show('note');
