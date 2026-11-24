@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#211330">
+<title>Para Você, Neném ♡</title>
+<meta name="description" content="Uma pequena aventura romântica em pixel art, feita por Henrique.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Para Você, Neném ♡">
+<meta property="og:description" content="Preparei uma pequena aventura para te lembrar o quanto você é especial para mim.">
+<meta property="og:url" content="https://flanhenrique.github.io/para-voce-nenem/">
+<meta property="og:image" content="https://flanhenrique.github.io/para-voce-nenem/capa.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Dois personagens em pixel art sob um céu lilás, com um coração entre eles.">
+<link rel="icon" type="image/png" href="coracao.png">
+<link rel="stylesheet" href="style.css">
+<script defer src="game.js"></script>
+</head>
+<body>
+<main id="app" data-state="intro">
+  <header>
+    <span class="brand"><img src="coracao.png" alt=""> Para Você, Neném</span>
+    <button id="audio" type="button" aria-pressed="false">Som ligado</button>
+  </header>
+  <div class="stage">
+    <canvas id="scene" width="320" height="320" aria-label="Jardim em pixel art sob a lua"></canvas>
+    <section id="intro" class="overlay">
+      <div class="title-card">
+        <h1>Para você,<br>Neném ♡</h1>
+        <p>Preparei uma pequena aventura para te lembrar o quanto você é especial para mim.</p>
+        <button class="primary" id="start">Começar nossa aventura</button>
+      </div>
+    </section>
+    <div id="hud" hidden>
+      <span class="meter" aria-hidden="true">♡ ♡ ♡ ♡ ♡</span>
+      <span id="count" aria-live="polite">0 / 5</span>
+    </div>
+    <div id="note" class="overlay" role="dialog" aria-modal="true" aria-labelledby="message" hidden>
+      <div class="note-card">
+        <img src="coracao.png" alt="">
+        <p id="message"></p>
+        <button class="primary" id="continue">Continuar</button>
+      </div>
+    </div>
+  </div>
+  <section id="controls" hidden aria-label="Controles do jogo">
+    <p id="hint">Encontre os cinco corações no jardim.</p>
+    <div class="pad" role="group" aria-label="Direções">
+      <button data-dir="left" aria-label="Esquerda">◀</button>
+      <button data-dir="up" aria-label="Cima">▲</button>
+      <button data-dir="down" aria-label="Baixo">▼</button>
+      <button data-dir="right" aria-label="Direita">▶</button>
+    </div>
+  </section>
+  <footer id="credit">Feito com carinho por Henrique</footer>
+  <section id="ending" hidden>
+    <article class="letter">
+      <h2 tabindex="-1" id="letter-title">Meu neném,</h2>
+      <p>Desde que você chegou, tenho descoberto o quanto é especial conhecer alguém e se encantar um pouco mais a cada dia.</p>
+      <p>Gosto da sua doçura, do seu carinho, da sua personalidade e desse seu jeito único que me faz querer estar cada vez mais perto de você.</p>
+      <p>Fiz esse pequeno jogo porque queria encontrar uma maneira diferente de demonstrar o quanto você é especial para mim.</p>
+      <p>Espero que essa seja apenas uma das muitas lembranças bonitas que ainda vamos construir juntos.</p>
+      <p class="signature">Com amor, Henrique.</p>
+    </article>
+    <canvas id="together" width="160" height="80" aria-label="Os dois personagens juntos, rodeados de corações"></canvas>
+    <p class="farewell">Que essa seja apenas a primeira de muitas aventuras nossas.</p>
+    <button class="primary" id="replay">Jogar novamente</button>
+  </section>
+</main>
+</body>
+</html>
