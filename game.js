@@ -7,11 +7,11 @@ const ctx = scene.getContext('2d');
 const finale = $('#together').getContext('2d');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const hearts = [
-  { x: 66, y: 241, message: 'Eu amo conhecer um pouquinho mais de você a cada dia.' },
-  { x: 66, y: 161, message: 'Seu carinho e sua doçura me encantam.' },
-  { x: 160, y: 174, message: 'Adoro a maneira como você torna meus dias mais especiais.' },
-  { x: 251, y: 238, message: 'Entre tantas pessoas, que sorte a minha ter encontrado você.' },
-  { x: 251, y: 154, message: 'E, se depender de mim, ainda temos muitas histórias para viver juntos.' },
+  { x: 66, y: 241, message: 'Se nosso encontro fosse planejado, talvez eu não tivesse conhecido você.' },
+  { x: 66, y: 161, message: 'E quem diria que conhecer você viria em dobro?' },
+  { x: 160, y: 174, message: 'Podemos ter pouco tempo para nos ver, mas sempre aproveitamos cada minuto.' },
+  { x: 251, y: 238, message: 'E, como você me disse, você não é qualquer cara.' },
+  { x: 251, y: 154, message: 'A cada encontro nosso, sinto como se fosse o primeiro.' },
 ];
 const obstacles = [{ x: 105, y: 207 }, { x: 213, y: 210 }, { x: 159, y: 246 }];
 const partner = { x: 160, y: 127 };
@@ -84,7 +84,7 @@ function rect(c, color, x, y, w, h) {
 }
 
 const heartShape = ['0110110', '1111111', '1111111', '0111110', '0011100', '0001000'];
-function heart(c, x, y, size, color = '#ff719f') {
+function heart(c, x, y, size, color = '#f4bd61') {
   heartShape.forEach((row, dy) => {
     [...row].forEach((pixel, dx) => {
       if (pixel === '1') rect(c, color, x + (dx - 3) * size, y + dy * size, size, size);
@@ -98,87 +98,92 @@ function star(c, x, y, color) {
 }
 
 function person(c, x, y, type, step = 0) {
-  const shirt = type ? '#b9a0fc' : '#ff8ab8';
-  const hair = type ? '#32213e' : '#573348';
+  const shirt = type ? '#e8e7d9' : '#548bd5';
+  const hair = type ? '#26222a' : '#24242b';
   const skin = type ? '#cf916d' : '#f4b590';
-  rect(c, '#281932', x - 8, y + 1, 17, 3);
-  rect(c, '#332843', x - 5, y - 6, 10, 8);
-  rect(c, '#1e1835', x - 6, y + step, 5, 2);
-  rect(c, '#1e1835', x + 2, y - step, 5, 2);
+  rect(c, '#17283b', x - 8, y + 1, 17, 3);
+  rect(c, '#22334a', x - 5, y - 6, 10, 8);
+  rect(c, '#101e32', x - 6, y + step, 5, 2);
+  rect(c, '#101e32', x + 2, y - step, 5, 2);
   rect(c, shirt, x - 7, y - 15, 14, 10);
-  rect(c, type ? '#8066be' : '#be527e', x - 7, y - 8, 14, 3);
+  rect(c, type ? '#9baead' : '#345c97', x - 7, y - 8, 14, 3);
   rect(c, skin, x - 8, y - 10, 3, 4);
   rect(c, skin, x + 5, y - 10, 3, 4);
   rect(c, hair, x - 7, y - 27, 14, 11);
   rect(c, hair, x - 4, y - 29, 9, 3);
   rect(c, skin, x - 5, y - 23, 11, 9);
   rect(c, hair, x - 6, y - 24, type ? 4 : 7, 3);
-  rect(c, '#382037', x - 3, y - 20, 1, 2);
-  rect(c, '#382037', x + 3, y - 20, 1, 2);
+  rect(c, '#27232a', x - 3, y - 20, 1, 2);
+  rect(c, '#27232a', x + 3, y - 20, 1, 2);
   rect(c, '#ab5f69', x, y - 16, 2, 1);
+  if (!type) {
+    rect(c, '#1e2a35', x - 6, y - 21, 4, 1);
+    rect(c, '#1e2a35', x + 2, y - 21, 4, 1);
+    rect(c, '#1e2a35', x - 2, y - 20, 4, 1);
+  }
 }
 
 function tree(c, x, y, color) {
-  rect(c, '#3d263c', x - 3, y - 22, 7, 24);
-  rect(c, '#70485a', x + 1, y - 15, 2, 16);
-  rect(c, '#372344', x - 22, y - 42, 44, 25);
-  rect(c, '#372344', x - 16, y - 51, 32, 39);
+  rect(c, '#283739', x - 3, y - 22, 7, 24);
+  rect(c, '#667254', x + 1, y - 15, 2, 16);
+  rect(c, '#203b42', x - 22, y - 42, 44, 25);
+  rect(c, '#203b42', x - 16, y - 51, 32, 39);
   rect(c, color, x - 19, y - 44, 38, 22);
   rect(c, color, x - 12, y - 51, 24, 31);
-  rect(c, '#f7aac0', x - 14, y - 41, 9, 4);
-  rect(c, '#ffd2dc', x - 9, y - 46, 5, 3);
-  rect(c, '#ec90b7', x + 5, y - 35, 11, 5);
-  rect(c, '#a85a8b', x - 4, y - 24, 18, 5);
+  rect(c, '#78a191', x - 14, y - 41, 9, 4);
+  rect(c, '#a1bba0', x - 9, y - 46, 5, 3);
+  rect(c, '#609389', x + 5, y - 35, 11, 5);
+  rect(c, '#395f5b', x - 4, y - 24, 18, 5);
 }
 
 const garden = document.createElement('canvas');
 garden.width = garden.height = 320;
 function paintGarden(c) {
   const sky = c.createLinearGradient(0, 0, 0, 125);
-  sky.addColorStop(0, '#261c49');
-  sky.addColorStop(1, '#a15c90');
+  sky.addColorStop(0, '#132943');
+  sky.addColorStop(1, '#546c80');
   c.fillStyle = sky;
   c.fillRect(0, 0, 320, 125);
-  rect(c, '#f9c8db', 145, 22, 30, 32);
-  rect(c, '#f9c8db', 141, 27, 38, 22);
-  rect(c, '#ffdce5', 148, 25, 22, 23);
-  rect(c, '#edafcc', 151, 43, 24, 3);
+  rect(c, '#e7cb93', 145, 22, 30, 32);
+  rect(c, '#e7cb93', 141, 27, 38, 22);
+  rect(c, '#fae8ba', 148, 25, 22, 23);
+  rect(c, '#d6b985', 151, 43, 24, 3);
   for (let i = 0; i < 56; i++) {
     const x = (i * 71 + 9) % 320;
     const y = (i * 53 + 15) % 101;
     if (x > 136 && x < 184 && y > 18 && y < 57) continue;
-    if (i % 7 === 0) star(c, x, y, '#efb8d8');
-    else rect(c, i % 2 ? '#be8abb' : '#e6b4db', x, y, 1, 1);
+    if (i % 7 === 0) star(c, x, y, '#f0dfb7');
+    else rect(c, i % 2 ? '#7796a8' : '#a8bdc2', x, y, 1, 1);
   }
   for (let x = 0; x < 320; x += 8) {
     const y = 89 + Math.floor(12 * Math.sin(x / 26));
-    rect(c, '#674370', x, y, 8, 125 - y);
-    rect(c, '#52365d', x, 104 + Math.floor(5 * Math.sin(x / 13)), 8, 25);
+    rect(c, '#3d576b', x, y, 8, 125 - y);
+    rect(c, '#344d61', x, 104 + Math.floor(5 * Math.sin(x / 13)), 8, 25);
   }
-  rect(c, '#563c60', 0, 121, 320, 199);
+  rect(c, '#355e60', 0, 121, 320, 199);
   for (let y = 121; y < 320; y += 4) {
     const width = 47 + (y - 121) * 0.85;
     const shift = 13 * Math.sin(y / 24);
-    rect(c, '#765478', 158 - width / 2 + shift, y, Math.round(width), 4);
+    rect(c, '#6b7869', 158 - width / 2 + shift, y, Math.round(width), 4);
   }
   for (let i = 0; i < 580; i++) {
     const x = (i * 127 + Math.floor(i / 41) * 7) % 320;
     const y = 122 + (i * 43 + Math.floor(i / 23) * 13) % 198;
-    rect(c, ['#68476b', '#855e80', '#563b60'][i % 3], x, y, 2 + i % 3, 1);
+    rect(c, ['#426868', '#608275', '#2d5559'][i % 3], x, y, 2 + i % 3, 1);
     if (i % 6 === 0) {
-      rect(c, '#977791', x, y - 1, 1, 4);
-      rect(c, i % 4 ? '#e68fb2' : '#eec9bb', x - 1, y - 3, 3, 2);
+      rect(c, '#718d72', x, y - 1, 1, 4);
+      rect(c, i % 4 ? '#a9ba89' : '#f1d299', x - 1, y - 3, 3, 2);
     }
   }
   for (const [x, y, color] of [
-    [20, 145, '#a85886'], [300, 146, '#a85886'], [38, 179, '#ca729b'], [282, 180, '#ca729b'],
-    [18, 247, '#b55d8e'], [301, 250, '#b55d8e'], [26, 305, '#ca729b'], [294, 305, '#ca729b'],
+    [20, 145, '#467b74'], [300, 146, '#467b74'], [38, 179, '#59887b'], [282, 180, '#59887b'],
+    [18, 247, '#48766c'], [301, 250, '#48766c'], [26, 305, '#59887b'], [294, 305, '#59887b'],
   ]) tree(c, x, y, color);
   for (const {x, y} of obstacles) {
-    rect(c, '#44314f', x - 12, y + 3, 24, 5);
-    rect(c, '#634b69', x - 10, y - 3, 20, 8);
-    rect(c, '#a585a0', x - 6, y - 8, 13, 7);
-    rect(c, '#c3a2b7', x - 4, y - 7, 7, 2);
+    rect(c, '#2f4c56', x - 12, y + 3, 24, 5);
+    rect(c, '#536976', x - 10, y - 3, 20, 8);
+    rect(c, '#799094', x - 6, y - 8, 13, 7);
+    rect(c, '#9bb0ad', x - 4, y - 7, 7, 2);
   }
 }
 paintGarden(garden.getContext('2d'));
@@ -195,8 +200,8 @@ function drawScene(time, dt) {
   for (let i = 0; i < 10; i++) {
     const x = (37 * i + 19) % 320;
     const y = 65 + (43 * i) % 240 + (reduced ? 0 : Math.sin(time * 2 + i) * 4);
-    if (i % 3) star(ctx, x, y, '#e8a8c9');
-    else heart(ctx, x, y, 1, '#c681aa');
+    if (i % 3) star(ctx, x, y, '#d4d6a5');
+    else heart(ctx, x, y, 1, '#8dad9e');
   }
   if (state === 'intro') {
     person(ctx, 139, 282, 0);
@@ -207,9 +212,9 @@ function drawScene(time, dt) {
   hearts.forEach(({ x, y, taken }, i) => {
     if (taken) return;
     const bob = reduced ? 0 : Math.sin(time * 4 + i) * 2;
-    heart(ctx, x, y - 12 + bob, 2, '#4d2d54');
+    heart(ctx, x, y - 12 + bob, 2, '#504b39');
     heart(ctx, x, y - 14 + bob, 2);
-    rect(ctx, '#ffd0df', x - 5, y - 12 + bob, 3, 2);
+    rect(ctx, '#fff0b7', x - 5, y - 12 + bob, 3, 2);
   });
   const step = moving && !reduced ? Math.round(Math.sin(time * 24)) : 0;
   const people = [{...player, type: 0, step}, {...partner, type: 1, step: 0}];
@@ -223,19 +228,19 @@ function drawScene(time, dt) {
     p.y += p.vy * dt;
     p.life -= dt;
     ctx.globalAlpha = Math.max(0, p.life);
-    heart(ctx, p.x, p.y, 1, '#ffc3d7');
+    heart(ctx, p.x, p.y, 1, '#ffe1a1');
   }
   ctx.globalAlpha = 1;
 }
 
 function drawFinale(time) {
   finale.drawImage(garden, 80, 10, 160, 80, 0, 0, 160, 80);
-  rect(finale, '#63456b', 0, 70, 160, 10);
+  rect(finale, '#36565f', 0, 70, 160, 10);
   person(finale, 72, 70, 0);
   person(finale, 88, 70, 1);
   for (let i = 0; i < 7; i++) {
     const drift = reduced ? 0 : Math.sin(time * 2.5 + i);
-    heart(finale, 43 + i * 12, 27 + (i % 3) * 7 + drift * 5, i === 3 ? 2 : 1, '#ff9fc5');
+    heart(finale, 43 + i * 12, 27 + (i % 3) * 7 + drift * 5, i === 3 ? 2 : 1, '#f6c87d');
   }
 }
 
