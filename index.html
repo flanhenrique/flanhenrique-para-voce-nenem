@@ -50,7 +50,8 @@
     </div>
   </div>
   <section id="controls" hidden aria-label="Controles do jogo">
-    <p id="hint">Encontre os cinco corações no jardim.</p>
+    <p id="hint" aria-live="polite">Encontre os cinco corações no jardim.</p>
+    <button class="secondary" id="leave-chapter" hidden>Voltar ao mapa</button>
     <div class="pad" role="group" aria-label="Direções">
       <button data-dir="left" aria-label="Esquerda"></button>
       <button data-dir="up" aria-label="Cima"></button>
@@ -70,10 +71,15 @@
     </article>
     <canvas id="together" width="160" height="80" aria-label="Os dois personagens juntos, rodeados de corações"></canvas>
     <p class="farewell">Que essa seja apenas a primeira de muitas aventuras nossas.</p>
-    <button class="primary" id="open-memories" aria-expanded="false" aria-controls="memories">Explorar nossas memórias</button>
+    <button class="primary" id="open-memories" aria-expanded="false" aria-controls="memories">Continuar nossa história</button>
     <button class="secondary" id="replay">Jogar novamente</button>
     <section id="memories" hidden aria-labelledby="memories-title">
       <h2 id="memories-title" tabindex="-1">Nós dois em Manaus</h2>
+      <div class="chapter-list" aria-label="Fases da história">
+        <button class="secondary" data-chapter="0"><strong>O encontro que ninguém planejou</strong><span>Teatro Amazonas</span></button>
+        <button class="secondary" data-chapter="1"><strong>Cada minuto com você</strong><span>Passeio noturno</span></button>
+        <button class="secondary" data-chapter="2"><strong>Como se fosse a primeira vez</strong><span>Reencontro e álbum</span></button>
+      </div>
       <p>Toque em um coração para ver as fotos e os vídeos daquele ponto.</p>
       <div class="memory-map">
         <img id="city-map" src="manaus.png" width="240" height="236" loading="lazy" alt="Mapa de Manaus em pixel art, com ruas reais e o Rio Negro">
@@ -82,6 +88,12 @@
       <div id="memory-choices" role="group" aria-label="Escolher uma galeria"></div>
       <p class="map-caption">Os corações agrupam lembranças próximas. A foto 02 marca o Teatro Amazonas.</p>
       <p class="map-caption">Mapa © <a href="https://www.openstreetmap.org/copyright">colaboradores do OpenStreetMap</a>, via <a href="https://openfreemap.org/">OpenFreeMap</a>.</p>
+      <section id="album-select" hidden aria-labelledby="album-title">
+        <h3 id="album-title" tabindex="-1">Escolha três lembranças</h3>
+        <p>Abra uma foto ou um vídeo e toque em “Guardar no álbum”.</p>
+        <p id="album-count" aria-live="polite">0 de 3 escolhidas</p>
+        <button class="primary" id="build-album" disabled>Montar nosso álbum</button>
+      </section>
       <figure id="map-memory" hidden>
         <img id="map-photo" alt="" hidden>
         <video id="map-video" controls playsinline preload="metadata" hidden aria-label="Vídeo da galeria"></video>
@@ -91,7 +103,14 @@
           <span id="memory-position" aria-live="polite"></span>
           <button class="secondary" id="next-memory">Próxima</button>
         </div>
+        <button class="secondary" id="save-memory" aria-pressed="false" hidden>Guardar no álbum</button>
       </figure>
+      <section id="album" aria-labelledby="album-heading" hidden>
+        <h3 id="album-heading" tabindex="-1">Nosso álbum</h3>
+        <div id="album-pages"></div>
+        <p>Da próxima vez que a gente se encontrar, já temos mais uma página pra preencher.</p>
+        <button class="secondary" id="edit-album">Trocar lembranças</button>
+      </section>
     </section>
   </section>
 </main>

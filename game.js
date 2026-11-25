@@ -64,7 +64,7 @@ function enableAudio() {
 }
 
 function music() {
-  if (!memoryVideo.paused && !memoryVideo.ended) return;
+  if ((!memoryVideo.paused && !memoryVideo.ended) || albumVideos.some(video => !video.paused && !video.ended)) return;
   if (!audio || muted || audio.state !== 'running' || state === 'intro') return;
   if (nextBeat < audio.currentTime) nextBeat = audio.currentTime + 0.02;
   if (nextBeat > audio.currentTime + 0.08) return;
@@ -267,6 +267,14 @@ function show(next) {
 }
 
 function start() {
+  chapterRun = null;
+  $('#leave-chapter').hidden = true;
+  completedChapters.clear();
+  albumChoices.clear();
+  resetAlbum();
+  updateChapterMenu();
+  $('#scene').setAttribute('aria-label', 'Jardim em pixel art sob a lua');
+  $('#continue').textContent = 'Continuar';
   $('#memories').hidden = true;
   $('#open-memories').setAttribute('aria-expanded', 'false');
   $('#map-memory').hidden = true;
@@ -314,8 +322,13 @@ function update(dt) {
   moving = Boolean(dx || dy);
   if (!moving) return;
   const distance = 81 * dt / (Math.hypot(dx, dy) || 1);
-  if (valid(player.x + dx * distance, player.y)) player.x += dx * distance;
-  if (valid(player.x, player.y + dy * distance)) player.y += dy * distance;
+  const canMove = chapterRun ? validChapterPosition : valid;
+  if (canMove(player.x + dx * distance, player.y)) player.x += dx * distance;
+  if (canMove(player.x, player.y + dy * distance)) player.y += dy * distance;
+  if (chapterRun) {
+    checkChapterStop();
+    return;
+  }
   const found = hearts.find(h => !h.taken && Math.hypot(h.x - player.x, h.y - player.y) < 12);
   if (found) collect(found);
   else if (hearts.every(h => h.taken) && Math.hypot(partner.x - player.x, partner.y - player.y) < 22) {
@@ -346,6 +359,7 @@ function frame(timestamp) {
     }
   }
   if (state === 'ending') drawFinale(timestamp / 1000);
+  else if (chapterRun) drawChapter(timestamp / 1000);
   else drawScene(timestamp / 1000, dt);
   music();
   requestAnimationFrame(frame);
@@ -450,14 +464,16 @@ function showGalleryItem() {
   $('#previous-memory').disabled = galleryIndex === 0;
   $('#next-memory').disabled = galleryIndex === currentGallery.length - 1;
   $('#map-memory').hidden = false;
+  updateAlbumSelection();
 }
 
-function openGallery(items) {
+function openGallery(items, scroll = true) {
+  albumVideos.forEach(video => video.pause());
   currentGallery = items;
   galleryIndex = 0;
   galleryButtons.forEach((button, gallery) => button.setAttribute('aria-pressed', String(gallery === items)));
   showGalleryItem();
-  $('#map-memory').scrollIntoView({ block: 'nearest', behavior: reduced ? 'instant' : 'smooth' });
+  if (scroll) $('#map-memory').scrollIntoView({ block: 'nearest', behavior: reduced ? 'instant' : 'smooth' });
 }
 
 function addGalleryButton(items, label, parent) {
@@ -507,6 +523,10 @@ $('#open-memories').addEventListener('click', () => {
 $('#start').addEventListener('click', start);
 $('#replay').addEventListener('click', start);
 $('#continue').addEventListener('click', () => {
+  if (chapterRun && chapterRun.index === chapters[chapterRun.id].stops.length) {
+    finishChapter();
+    return;
+  }
   show('playing');
   buttons[0].focus({ preventScroll: true });
   enableAudio();
@@ -518,4 +538,251 @@ $('#audio').addEventListener('click', (event) => {
   if (volume) volume.gain.setTargetAtTime(muted ? 0 : 0.7, audio.currentTime, 0.02);
   if (!muted && state !== 'intro') enableAudio();
 });
+const chapters = [
+  {
+    title: 'O encontro que ninguém planejou',
+    place: 'Teatro Amazonas',
+    instruction: 'Siga as luzes da praça até o Teatro Amazonas.',
+    stops: [
+      { x: 76, y: 255 }, { x: 113, y: 208 }, { x: 210, y: 178 },
+      { x: 160, y: 134, memory: 1 },
+    ],
+  },
+  {
+    title: 'Cada minuto com você',
+    place: 'Passeio noturno',
+    instruction: 'Caminhe até a próxima parada iluminada.',
+    stops: [
+      { x: 70, y: 242, memory: 0 },
+      { x: 250, y: 196, memory: 3 },
+      { x: 160, y: 132, memory: 2 },
+    ],
+  },
+  {
+    title: 'Como se fosse a primeira vez',
+    place: 'Reencontro e álbum',
+    instruction: 'Caminhe até ele para começar o álbum.',
+    stops: [{ x: 160, y: 135, memory: 4 }],
+  },
+];
+let chapterRun = null;
+const completedChapters = new Set();
+const chapterButtons = [...document.querySelectorAll('[data-chapter]')];
+const albumChoices = new Set();
+let albumMode = false;
+let albumVideos = [];
+
+function updateChapterMenu() {
+  chapterButtons.forEach((button, index) => {
+    button.querySelector('span').textContent = chapters[index].place +
+      (completedChapters.has(index) ? ' · Concluída' : '');
+  });
+}
+
+function updateChapterProgress() {
+  const chapter = chapters[chapterRun.id];
+  const count = chapterRun.index;
+  $('#count').textContent = count + ' / ' + chapter.stops.length;
+  $('.meter').textContent = chapter.stops.map((_, index) => index < count ? '♥' : '♡').join(' ');
+  $('#hint').textContent = chapter.instruction;
+}
+
+function beginChapter(id) {
+  resetMemoryGallery();
+  resetAlbum();
+  $('#map-memory').hidden = true;
+  chapterRun = { id, index: 0 };
+  player.x = 160;
+  player.y = 286;
+  particles = [];
+  $('#scene').setAttribute('aria-label', chapters[id].title + ' em pixel art');
+  $('#leave-chapter').hidden = false;
+  $('#continue').textContent = 'Continuar';
+  updateChapterProgress();
+  show('playing');
+  window.scrollTo(0, 0);
+  buttons[0].focus({ preventScroll: true });
+  enableAudio();
+}
+
+function validChapterPosition(x, y) {
+  return x >= 26 && x <= 294 && y >= 124 && y <= 303;
+}
+
+function checkChapterStop() {
+  const chapter = chapters[chapterRun.id];
+  const stop = chapter.stops[chapterRun.index];
+  if (Math.hypot(stop.x - player.x, stop.y - player.y) > 13) return;
+  chapterRun.index++;
+  updateChapterProgress();
+  chime([76, 81, 88]);
+  if (stop.memory === undefined) return;
+
+  const memory = allMemories[stop.memory];
+  const photo = $('#memory-photo');
+  photo.alt = memory.alt;
+  photo.src = memory.src;
+  $('#message').textContent = memory.message;
+  if (chapterRun.index === chapter.stops.length) {
+    $('#continue').textContent = chapterRun.id === 2 ? 'Escolher lembranças' : 'Voltar às fases';
+  }
+  show('note');
+  $('#continue').focus({ preventScroll: true });
+}
+
+function returnToChapters() {
+  chapterRun = null;
+  $('#leave-chapter').hidden = true;
+  show('ending');
+  $('#memories-title').focus();
+}
+
+function finishChapter() {
+  const id = chapterRun.id;
+  if (id !== 2) completedChapters.add(id);
+  updateChapterMenu();
+  returnToChapters();
+  if (id === 2) editAlbum();
+}
+
+function drawChapter(time) {
+  const id = chapterRun.id;
+  const chapter = chapters[id];
+  rect(ctx, '#142a44', 0, 0, 320, 320);
+  rect(ctx, '#efd598', 245, 25, 24, 25);
+  rect(ctx, '#142a44', 251, 21, 21, 20);
+  for (let i = 0; i < 24; i++) {
+    rect(ctx, i % 3 ? '#779aae' : '#e9d2a7', (i * 83 + 19) % 314, (i * 39 + 13) % 91, 2, 1);
+  }
+
+  rect(ctx, '#2b4b58', 0, 117, 320, 203);
+  for (let y = 122; y < 320; y += 12) {
+    for (let x = (y % 8) * 2 - 16; x < 320; x += 22) {
+      rect(ctx, (x + y) % 3 ? '#355765' : '#42616d', x, y, 18, 8);
+    }
+  }
+  if (id === 0) {
+    // The stepped dome and lit colonnade mark the theater from the plaza.
+    for (let row = 0; row < 6; row++) {
+      rect(ctx, row % 2 ? '#547e72' : '#88a381', 146 - row * 4, 36 + row * 5, 28 + row * 8, 5);
+    }
+    rect(ctx, '#ead191', 157, 32, 6, 6);
+    rect(ctx, '#c28b75', 79, 65, 162, 50);
+    rect(ctx, '#f0d6a1', 73, 63, 174, 5);
+    rect(ctx, '#f0d6a1', 73, 110, 174, 5);
+    for (let x = 92; x < 232; x += 24) {
+      rect(ctx, '#363d50', x, 77, 14, 31);
+      rect(ctx, '#efd598', x + 3, 81, 8, 12);
+      rect(ctx, '#eac9a0', x - 4, 73, 3, 37);
+    }
+    rect(ctx, '#a69b84', 120, 115, 80, 4);
+    rect(ctx, '#6c7c77', 115, 119, 90, 5);
+  } else {
+    for (let x = 0; x < 320; x += 25) {
+      const height = 22 + ((x * 13) % 36);
+      rect(ctx, '#213b50', x, 115 - height, 23, height);
+      for (let y = 122 - height; y < 108; y += 10) {
+        rect(ctx, '#be9e65', x + 5, y, 4, 3);
+        rect(ctx, '#5c8288', x + 13, y, 4, 3);
+      }
+    }
+  }
+  for (const [x, y] of [[33, 174], [285, 175], [32, 281], [288, 281]]) {
+    rect(ctx, '#182b3c', x - 1, y - 28, 3, 30);
+    rect(ctx, '#8c7551', x - 6, y - 34, 13, 10);
+    rect(ctx, '#ffe5a5', x - 4, y - 32, 9, 6);
+  }
+  chapter.stops.forEach((stop, index) => {
+    rect(ctx, index < chapterRun.index ? '#708779' : '#567980', stop.x - 8, stop.y - 2, 16, 4);
+    if (index === chapterRun.index && id !== 2) {
+      const bob = reduced ? 0 : Math.sin(time * 4) * 3;
+      star(ctx, stop.x, stop.y - 12 + bob, '#fff0b7');
+      if (stop.memory !== undefined) heart(ctx, stop.x, stop.y - 29 + bob, 2);
+    }
+  });
+  if (id === 2) {
+    person(ctx, 160, 126, 1);
+    heart(ctx, 160, 88 + (reduced ? 0 : Math.sin(time * 4) * 3), 2);
+  }
+  person(ctx, player.x, player.y, 0, moving && !reduced ? Math.round(Math.sin(time * 24)) : 0);
+}
+
+function resetAlbum() {
+  albumMode = false;
+  albumVideos.forEach(video => video.pause());
+  albumVideos = [];
+  $('#album-pages').replaceChildren();
+  $('#album').hidden = true;
+  $('#album-select').hidden = true;
+  updateAlbumSelection();
+}
+
+function updateAlbumSelection() {
+  const current = currentGallery?.[galleryIndex];
+  const chosen = albumChoices.has(current);
+  const save = $('#save-memory');
+  save.hidden = !albumMode || !current;
+  save.disabled = !chosen && albumChoices.size === 3;
+  save.setAttribute('aria-pressed', String(chosen));
+  save.textContent = chosen ? 'Remover do álbum' : 'Guardar no álbum';
+  $('#album-count').textContent = albumChoices.size + ' de 3 escolhidas';
+  $('#build-album').disabled = albumChoices.size !== 3;
+}
+
+function editAlbum() {
+  resetAlbum();
+  albumMode = true;
+  $('#album-select').hidden = false;
+  openGallery(allMemories, false);
+  $('#album-title').focus();
+}
+
+function buildAlbum() {
+  if (albumChoices.size !== 3) return;
+  resetAlbum();
+  stopMemoryVideo();
+  $('#map-memory').hidden = true;
+  for (const memory of albumChoices) {
+    const page = document.createElement('figure');
+    const media = document.createElement(memory.video ? 'video' : 'img');
+    if (memory.video) {
+      media.controls = true;
+      media.playsInline = true;
+      media.preload = 'metadata';
+      media.setAttribute('aria-label', 'Vídeo do nosso álbum');
+      media.addEventListener('play', () => {
+        stopMemoryVideo();
+        albumVideos.forEach(video => { if (video !== media) video.pause(); });
+      });
+      albumVideos.push(media);
+    } else {
+      media.alt = memory.alt || 'Foto do nosso álbum';
+    }
+    media.src = memory.src;
+    page.append(media);
+    if (memory.message) {
+      const caption = document.createElement('figcaption');
+      caption.textContent = memory.message;
+      page.append(caption);
+    }
+    $('#album-pages').append(page);
+  }
+  completedChapters.add(2);
+  updateChapterMenu();
+  $('#album').hidden = false;
+  $('#album-heading').focus();
+}
+
+chapterButtons.forEach((button, index) => button.addEventListener('click', () => beginChapter(index)));
+$('#leave-chapter').addEventListener('click', returnToChapters);
+$('#save-memory').addEventListener('click', () => {
+  const current = currentGallery?.[galleryIndex];
+  if (!albumMode || !current) return;
+  if (albumChoices.has(current)) albumChoices.delete(current);
+  else if (albumChoices.size < 3) albumChoices.add(current);
+  updateAlbumSelection();
+});
+$('#build-album').addEventListener('click', buildAlbum);
+$('#edit-album').addEventListener('click', editAlbum);
+
 requestAnimationFrame(frame);

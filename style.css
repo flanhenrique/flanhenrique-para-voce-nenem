@@ -199,3 +199,26 @@ html.playing #app { height: 100vh; height: 100dvh; min-height: 0; }
 .memory-pin { font-size: .95rem; }
 .memory-navigation { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
 .memory-navigation button:disabled { opacity: .55; cursor: default; }
+
+.chapter-list {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+.chapter-list button { text-align: left; }
+.chapter-list strong, .chapter-list span { display: block; }
+.chapter-list span { color: #b4d1d4; font-size: .875rem; margin-top: 2px; }
+#leave-chapter { margin: 3px 0 8px; }
+#album-select, #album {
+  margin: 16px 0 0;
+  padding: 12px;
+  background: #20394d;
+  border: 1px solid #678e9b;
+}
+#album-select h3, #album h3 { color: #ffdc91; margin: 0; }
+#save-memory { margin-top: 10px; }
+#save-memory[aria-pressed="true"] { background: #ffdc91; color: #30291d; }
+#build-album:disabled, #save-memory:disabled { opacity: .55; cursor: default; }
+#album-pages { display: grid; gap: 12px; margin: 12px 0; }
+#album-pages figure { margin: 0; }
+#album-pages img, #album-pages video { display: block; max-height: 55vh; width: 100%; object-fit: contain; background: #101d32; }
