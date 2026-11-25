@@ -51,11 +51,9 @@
   </div>
   <section id="controls" hidden aria-label="Controles do jogo">
     <p id="hint">Encontre os cinco corações no jardim.</p>
-    <div class="pad" role="group" aria-label="Direções">
-      <button data-dir="left" aria-label="Esquerda"></button>
-      <button data-dir="up" aria-label="Cima"></button>
-      <button data-dir="down" aria-label="Baixo"></button>
-      <button data-dir="right" aria-label="Direita"></button>
+    <div id="joystick" role="group" tabindex="-1" aria-label="Joystick. Arraste para mover ou use as setas ou WASD.">
+      <span class="stick-guide" aria-hidden="true">◆</span>
+      <span id="joystick-thumb" aria-hidden="true"></span>
     </div>
   </section>
   <footer id="credit">Feito com carinho por Henrique</footer>

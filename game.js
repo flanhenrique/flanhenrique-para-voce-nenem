@@ -21,7 +21,11 @@ const keyDirections = new Map([
   ['ArrowLeft', 'left'], ['a', 'left'], ['ArrowRight', 'right'], ['d', 'right'],
 ]);
 const input = new Map();
-const buttons = [...document.querySelectorAll('[data-dir]')];
+const joystick = $('#joystick');
+const joystickThumb = $('#joystick-thumb');
+let stickPointer = null;
+let stickX = 0;
+let stickY = 0;
 let state = 'intro';
 let particles = [];
 let meeting = 0;
@@ -247,7 +251,7 @@ function drawFinale(time) {
 
 function clearInput() {
   input.clear();
-  buttons.forEach(button => button.classList.remove('held'));
+  resetJoystick();
   moving = false;
 }
 
@@ -261,7 +265,6 @@ function show(next) {
   $('#controls').hidden = next === 'intro' || next === 'ending';
   $('#note').hidden = next !== 'note';
   $('#ending').hidden = next !== 'ending';
-  buttons.forEach(button => { button.disabled = next !== 'playing'; });
   $('#audio').inert = next === 'note';
   clearInput();
 }
@@ -283,7 +286,7 @@ function start() {
   window.scrollTo(0, 0);
   show('playing');
   enableAudio();
-  buttons[0].focus({ preventScroll: true });
+  joystick.focus({ preventScroll: true });
 }
 
 function collect(h) {
@@ -309,11 +312,13 @@ function valid(x, y) {
 
 function update(dt) {
   const directions = new Set(input.values());
-  const dx = Number(directions.has('right')) - Number(directions.has('left'));
-  const dy = Number(directions.has('down')) - Number(directions.has('up'));
+  const keyX = Number(directions.has('right')) - Number(directions.has('left'));
+  const keyY = Number(directions.has('down')) - Number(directions.has('up'));
+  const dx = keyX || keyY ? keyX : stickX;
+  const dy = keyX || keyY ? keyY : stickY;
   moving = Boolean(dx || dy);
   if (!moving) return;
-  const distance = 81 * dt / (Math.hypot(dx, dy) || 1);
+  const distance = 81 * dt / Math.max(1, Math.hypot(dx, dy));
   if (valid(player.x + dx * distance, player.y)) player.x += dx * distance;
   if (valid(player.x, player.y + dy * distance)) player.y += dy * distance;
   const found = hearts.find(h => !h.taken && Math.hypot(h.x - player.x, h.y - player.y) < 12);
@@ -374,22 +379,50 @@ document.addEventListener('visibilitychange', () => {
   } else if (audio && !muted && state !== 'intro') enableAudio();
 });
 
-for (const button of buttons) {
-  button.addEventListener('pointerdown', event => {
-    if (state !== 'playing' || event.button !== 0) return;
-    event.preventDefault();
-    button.setPointerCapture(event.pointerId);
-    input.set(event.pointerId, button.dataset.dir);
-    button.classList.add('held');
-    enableAudio();
-  });
-  for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) {
-    button.addEventListener(name, event => {
-      input.delete(event.pointerId);
-      if (![...input.values()].includes(button.dataset.dir)) button.classList.remove('held');
-    });
-  }
+function resetJoystick() {
+  const pointer = stickPointer;
+  stickPointer = null;
+  stickX = 0;
+  stickY = 0;
+  joystick.classList.remove('engaged');
+  joystickThumb.style.transform = '';
+  if (pointer !== null && joystick.hasPointerCapture(pointer)) joystick.releasePointerCapture(pointer);
 }
+
+function moveJoystick(event) {
+  const bounds = joystick.getBoundingClientRect();
+  const dx = event.clientX - bounds.left - bounds.width / 2;
+  const dy = event.clientY - bounds.top - bounds.height / 2;
+  const distance = Math.hypot(dx, dy);
+  const travel = bounds.width * 0.29;
+  const deadZone = travel * 0.18;
+  const strength = Math.min(1, Math.max(0, (distance - deadZone) / (travel - deadZone)));
+  const directionX = distance ? dx / distance : 0;
+  const directionY = distance ? dy / distance : 0;
+  stickX = directionX * strength;
+  stickY = directionY * strength;
+  const reach = Math.min(distance, travel);
+  joystickThumb.style.transform = 'translate(' + directionX * reach + 'px, ' + directionY * reach + 'px)';
+}
+
+joystick.addEventListener('pointerdown', event => {
+  if (state !== 'playing' || stickPointer !== null || event.button !== 0) return;
+  event.preventDefault();
+  stickPointer = event.pointerId;
+  joystick.setPointerCapture(stickPointer);
+  joystick.classList.add('engaged');
+  moveJoystick(event);
+  enableAudio();
+});
+joystick.addEventListener('pointermove', event => {
+  if (event.pointerId === stickPointer) moveJoystick(event);
+});
+for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+  joystick.addEventListener(name, event => {
+    if (event.pointerId === stickPointer) resetJoystick();
+  });
+}
+
 // Keep the five memories from the original adventure at their known locations.
 const originalLocations = [[53.775, 43.393], [62.039, 73.585], [70.082, 45.797],
   [49.315, 61.760], [70.556, 46.385]];
@@ -508,7 +541,7 @@ $('#start').addEventListener('click', start);
 $('#replay').addEventListener('click', start);
 $('#continue').addEventListener('click', () => {
   show('playing');
-  buttons[0].focus({ preventScroll: true });
+  joystick.focus({ preventScroll: true });
   enableAudio();
 });
 $('#audio').addEventListener('click', (event) => {
