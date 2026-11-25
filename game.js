@@ -514,11 +514,15 @@ $('#next-memory').addEventListener('click', () => {
   showGalleryItem();
 });
 
-$('#open-memories').addEventListener('click', () => {
+function openChapterMenu() {
   $('#memories').hidden = false;
   $('#open-memories').setAttribute('aria-expanded', 'true');
-  $('#memories-title').focus();
-});
+  const heading = $('#fases');
+  heading.focus({ preventScroll: true });
+  heading.scrollIntoView({ block: 'start' });
+}
+
+$('#open-memories').addEventListener('click', openChapterMenu);
 
 $('#start').addEventListener('click', start);
 $('#replay').addEventListener('click', start);
@@ -634,7 +638,7 @@ function returnToChapters() {
   chapterRun = null;
   $('#leave-chapter').hidden = true;
   show('ending');
-  $('#memories-title').focus();
+  openChapterMenu();
 }
 
 function finishChapter() {
@@ -784,5 +788,10 @@ $('#save-memory').addEventListener('click', () => {
 });
 $('#build-album').addEventListener('click', buildAlbum);
 $('#edit-album').addEventListener('click', editAlbum);
+
+if (window.location.hash === '#fases') {
+  show('ending');
+  openChapterMenu();
+}
 
 requestAnimationFrame(frame);

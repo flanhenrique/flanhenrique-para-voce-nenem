@@ -222,3 +222,5 @@ html.playing #app { height: 100vh; height: 100dvh; min-height: 0; }
 #album-pages { display: grid; gap: 12px; margin: 12px 0; }
 #album-pages figure { margin: 0; }
 #album-pages img, #album-pages video { display: block; max-height: 55vh; width: 100%; object-fit: contain; background: #101d32; }
+#fases { margin: 12px 0 0; color: #f6e1ad; scroll-margin-top: 16px; }
+#fases:focus-visible { outline-offset: 4px; }

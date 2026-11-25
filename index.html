@@ -16,9 +16,9 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Dois personagens em pixel art sob um céu azul-noite, com um coração entre eles.">
 <link rel="icon" type="image/png" href="coracao.png">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=manaus-fases-2">
 <script defer src="memorias.js"></script>
-<script defer src="game.js"></script>
+<script defer src="game.js?v=manaus-fases-2"></script>
 </head>
 <body>
 <main id="app" data-state="intro">
@@ -75,7 +75,8 @@
     <button class="secondary" id="replay">Jogar novamente</button>
     <section id="memories" hidden aria-labelledby="memories-title">
       <h2 id="memories-title" tabindex="-1">Nós dois em Manaus</h2>
-      <div class="chapter-list" aria-label="Fases da história">
+      <h3 id="fases" tabindex="-1">Escolha uma das três fases</h3>
+      <div class="chapter-list" aria-labelledby="fases">
         <button class="secondary" data-chapter="0"><strong>O encontro que ninguém planejou</strong><span>Teatro Amazonas</span></button>
         <button class="secondary" data-chapter="1"><strong>Cada minuto com você</strong><span>Passeio noturno</span></button>
         <button class="secondary" data-chapter="2"><strong>Como se fosse a primeira vez</strong><span>Reencontro e álbum</span></button>
