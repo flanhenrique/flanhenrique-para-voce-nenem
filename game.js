@@ -266,6 +266,10 @@ function show(next) {
 }
 
 function start() {
+  $('#memories').hidden = true;
+  $('#open-memories').setAttribute('aria-expanded', 'false');
+  $('#map-memory').hidden = true;
+  memoryPins.forEach(pin => pin.setAttribute('aria-pressed', 'false'));
   player.x = 160;
   player.y = 285;
   partner.x = 160;
@@ -385,6 +389,85 @@ for (const button of buttons) {
     });
   }
 }
+const memoryPositions = [[20, 28], [40, 44], [51, 24], [71, 43], [82, 62]];
+const memoryPins = hearts.map((memory, index) => {
+  const pin = document.createElement('button');
+  pin.type = 'button';
+  pin.className = 'memory-pin';
+  pin.style.left = memoryPositions[index][0] + '%';
+  pin.style.top = memoryPositions[index][1] + '%';
+  pin.setAttribute('aria-label', 'Lembrança ' + (index + 1));
+  pin.setAttribute('aria-pressed', 'false');
+  pin.textContent = '♥';
+  pin.addEventListener('click', () => {
+    memoryPins.forEach(item => item.setAttribute('aria-pressed', String(item === pin)));
+    const photo = $('#map-photo');
+    photo.alt = memory.alt;
+    photo.src = 'fotos/' + memory.photo + '.jpg';
+    $('#map-message').textContent = memory.message;
+    $('#map-memory').hidden = false;
+    $('#map-memory').scrollIntoView({ block: 'nearest', behavior: reduced ? 'instant' : 'smooth' });
+  });
+  $('#memory-pins').append(pin);
+  return pin;
+});
+
+function drawCityMap() {
+  const map = $('#city-map').getContext('2d');
+  rect(map, '#28516b', 0, 0, 480, 300);
+  for (let y = 14; y < 300; y += 14) {
+    for (let x = ((y / 14) % 2) * 12; x < 480; x += 24) {
+      rect(map, '#315d75', x, y, 12, 1);
+    }
+  }
+  map.beginPath();
+  map.moveTo(0, 0);
+  for (const [x, y] of [[480, 0], [480, 257], [419, 232], [373, 224], [326, 204],
+    [287, 207], [259, 180], [213, 177], [181, 156], [147, 154], [134, 131],
+    [92, 126], [74, 108], [35, 103], [0, 86]]) map.lineTo(x, y);
+  map.closePath();
+  map.fillStyle = '#36675f';
+  map.fill();
+  map.save();
+  map.clip();
+  for (let y = 14; y < 250; y += 18) {
+    for (let x = 12; x < 480; x += 20) {
+      rect(map, (x + y) % 7 < 3 ? '#49776c' : '#3e7065', x, y, 9, 6);
+    }
+  }
+  map.strokeStyle = '#759488';
+  map.lineWidth = 3;
+  for (let i = 0; i < 8; i++) {
+    map.beginPath();
+    map.moveTo(12 + i * 62, -10);
+    map.lineTo(72 + i * 56, 103);
+    map.lineTo(54 + i * 64, 250);
+    map.stroke();
+  }
+  for (let i = 0; i < 5; i++) {
+    map.beginPath();
+    map.moveTo(-5, 14 + i * 29);
+    map.lineTo(194, 54 + i * 29);
+    map.lineTo(324, 45 + i * 33);
+    map.lineTo(485, 75 + i * 35);
+    map.stroke();
+  }
+  map.restore();
+  map.fillStyle = '#f6e1ad';
+  map.font = 'bold 19px monospace';
+  map.fillText('MANAUS', 24, 43);
+  map.fillStyle = '#c1d7e1';
+  map.font = 'italic 18px monospace';
+  map.fillText('Rio Negro', 48, 240);
+}
+
+$('#open-memories').addEventListener('click', () => {
+  $('#memories').hidden = false;
+  $('#open-memories').setAttribute('aria-expanded', 'true');
+  drawCityMap();
+  $('#memories-title').focus();
+});
+
 $('#start').addEventListener('click', start);
 $('#replay').addEventListener('click', start);
 $('#continue').addEventListener('click', () => {

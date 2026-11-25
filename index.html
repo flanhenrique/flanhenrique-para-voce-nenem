@@ -69,7 +69,21 @@
     </article>
     <canvas id="together" width="160" height="80" aria-label="Os dois personagens juntos, rodeados de corações"></canvas>
     <p class="farewell">Que essa seja apenas a primeira de muitas aventuras nossas.</p>
-    <button class="primary" id="replay">Jogar novamente</button>
+    <button class="primary" id="open-memories" aria-expanded="false" aria-controls="memories">Explorar nossas memórias</button>
+    <button class="secondary" id="replay">Jogar novamente</button>
+    <section id="memories" hidden aria-labelledby="memories-title">
+      <h2 id="memories-title" tabindex="-1">Nós dois em Manaus</h2>
+      <p>Toque em um coração para abrir uma lembrança.</p>
+      <div class="memory-map">
+        <canvas id="city-map" width="480" height="300" aria-label="Mapa ilustrado de Manaus à margem do Rio Negro"></canvas>
+        <div id="memory-pins" role="group" aria-label="Escolher lembrança"></div>
+      </div>
+      <p class="map-caption">Mapa ilustrativo. Os corações representam memórias.</p>
+      <figure id="map-memory" hidden>
+        <img id="map-photo" alt="">
+        <figcaption id="map-message" aria-live="polite"></figcaption>
+      </figure>
+    </section>
   </section>
 </main>
 </body>
