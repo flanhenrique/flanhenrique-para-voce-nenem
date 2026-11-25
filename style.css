@@ -194,3 +194,8 @@ html.playing #app { height: 100vh; height: 100dvh; min-height: 0; }
 .memory-choice[aria-pressed="true"] { background: #ffdc91; color: #30291d; }
 .map-caption a { color: inherit; }
 #map-place { display: block; font-weight: 700; margin-top: 8px; }
+
+#map-video { display: block; width: 100%; max-height: min(56vh, 28rem); }
+.memory-pin { font-size: .95rem; }
+.memory-navigation { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+.memory-navigation button:disabled { opacity: .55; cursor: default; }

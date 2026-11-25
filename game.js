@@ -64,6 +64,7 @@ function enableAudio() {
 }
 
 function music() {
+  if (!memoryVideo.paused && !memoryVideo.ended) return;
   if (!audio || muted || audio.state !== 'running' || state === 'intro') return;
   if (nextBeat < audio.currentTime) nextBeat = audio.currentTime + 0.02;
   if (nextBeat > audio.currentTime + 0.08) return;
@@ -269,8 +270,7 @@ function start() {
   $('#memories').hidden = true;
   $('#open-memories').setAttribute('aria-expanded', 'false');
   $('#map-memory').hidden = true;
-  selectedMemory = null;
-  updateMemorySelection();
+  resetMemoryGallery();
   player.x = 160;
   player.y = 285;
   partner.x = 160;
@@ -390,64 +390,112 @@ for (const button of buttons) {
     });
   }
 }
-// Positions projected onto the same map bounds as manaus.png.
-const memoryStops = [
-  { x: 53.775, y: 43.393, photos: [0] },
-  { x: 62.039, y: 73.585, photos: [1] },
-  { x: 70.319, y: 46.091, photos: [2, 4] },
-  { x: 49.315, y: 61.760, photos: [3] },
-];
-let selectedMemory = null;
+// Keep the five memories from the original adventure at their known locations.
+const originalLocations = [[53.775, 43.393], [62.039, 73.585], [70.082, 45.797],
+  [49.315, 61.760], [70.556, 46.385]];
+const allMemories = hearts.map((heart, index) => ({
+  src: 'fotos/' + heart.photo + '.jpg',
+  alt: heart.alt,
+  message: heart.message,
+  label: index === 1 ? 'Teatro Amazonas' : 'Foto ' + heart.photo,
+  x: originalLocations[index][0],
+  y: originalLocations[index][1],
+})).concat(importedMemories);
+const stops = [];
+const withoutPoint = [];
+allMemories.forEach(memory => {
+  if (memory.x === undefined) {
+    withoutPoint.push(memory);
+    return;
+  }
+  const nearby = stops.find(stop => Math.hypot(stop.x - memory.x, stop.y - memory.y) < 16);
+  if (nearby) nearby.items.push(memory);
+  else stops.push({ x: memory.x, y: memory.y, items: [memory] });
+});
 
-function updateMemorySelection() {
-  memoryPins.forEach((pin, i) => {
-    pin.setAttribute('aria-pressed', String(memoryStops[i].photos.includes(selectedMemory)));
-  });
-  memoryChoices.forEach((button, i) => {
-    button.setAttribute('aria-pressed', String(i === selectedMemory));
-  });
+let currentGallery = null;
+let galleryIndex = 0;
+const galleryButtons = new Map();
+const memoryVideo = $('#map-video');
+
+function stopMemoryVideo() {
+  if (!memoryVideo.hasAttribute('src')) return;
+  memoryVideo.pause();
+  memoryVideo.removeAttribute('src');
+  memoryVideo.load();
 }
 
-function openMemory(index) {
-  selectedMemory = index;
-  updateMemorySelection();
-  const memory = hearts[index];
+function resetMemoryGallery() {
+  currentGallery = null;
+  galleryIndex = 0;
+  stopMemoryVideo();
+  galleryButtons.forEach(button => button.setAttribute('aria-pressed', 'false'));
+}
+
+function showGalleryItem() {
+  const memory = currentGallery[galleryIndex];
   const photo = $('#map-photo');
-  photo.alt = memory.alt;
-  photo.src = 'fotos/' + memory.photo + '.jpg';
-  $('#map-place').textContent = index === 1 ? 'Teatro Amazonas' : 'Foto ' + memory.photo;
-  $('#map-message').textContent = memory.message;
+  stopMemoryVideo();
+  photo.hidden = Boolean(memory.video);
+  memoryVideo.hidden = !memory.video;
+  if (memory.video) memoryVideo.src = memory.src;
+  else {
+    photo.src = memory.src;
+    photo.alt = memory.alt || 'Foto da galeria de memórias';
+  }
+  $('#map-place').textContent = memory.label || (memory.video ? 'Vídeo' : 'Foto');
+  $('#map-message').textContent = memory.message || '';
+  $('#map-message').hidden = !memory.message;
+  $('#memory-position').textContent = (galleryIndex + 1) + ' de ' + currentGallery.length;
+  $('#previous-memory').disabled = galleryIndex === 0;
+  $('#next-memory').disabled = galleryIndex === currentGallery.length - 1;
   $('#map-memory').hidden = false;
+}
+
+function openGallery(items) {
+  currentGallery = items;
+  galleryIndex = 0;
+  galleryButtons.forEach((button, gallery) => button.setAttribute('aria-pressed', String(gallery === items)));
+  showGalleryItem();
   $('#map-memory').scrollIntoView({ block: 'nearest', behavior: reduced ? 'instant' : 'smooth' });
 }
 
-const memoryPins = memoryStops.map(({ x, y, photos }) => {
-  const pin = document.createElement('button');
-  pin.type = 'button';
-  pin.className = 'memory-pin';
-  pin.style.left = x + '%';
-  pin.style.top = y + '%';
-  const names = photos.map(index => hearts[index].photo);
-  pin.setAttribute('aria-label', photos.length === 1 ? 'Foto ' + names[0] : 'Fotos ' + names.join(' e '));
-  pin.setAttribute('aria-pressed', 'false');
-  pin.textContent = photos.length === 1 ? '♥' : '♥²';
-  pin.addEventListener('click', () => {
-    const next = (photos.indexOf(selectedMemory) + 1) % photos.length;
-    openMemory(photos[next]);
-  });
-  $('#memory-pins').append(pin);
-  return pin;
-});
-
-const memoryChoices = hearts.map((memory, index) => {
+function addGalleryButton(items, label, parent) {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'secondary memory-choice';
-  button.textContent = 'Foto ' + memory.photo;
   button.setAttribute('aria-pressed', 'false');
-  button.addEventListener('click', () => openMemory(index));
-  $('#memory-choices').append(button);
+  button.setAttribute('aria-label', label);
+  button.addEventListener('click', () => openGallery(items));
+  galleryButtons.set(items, button);
+  $(parent).append(button);
   return button;
+}
+
+stops.forEach(({ x, y, items }, index) => {
+  const label = 'Ponto ' + (index + 1) + ', ' + items.length + (items.length === 1 ? ' lembrança' : ' lembranças');
+  const pin = addGalleryButton(items, label, '#memory-pins');
+  pin.className = 'memory-pin';
+  pin.style.left = Math.max(8, Math.min(92, x)) + '%';
+  pin.style.top = Math.max(8, Math.min(92, y)) + '%';
+  pin.textContent = items.length === 1 ? '♥' : '♥ ' + items.length;
+});
+
+for (const [items, label] of [[allMemories, 'Todas'], [withoutPoint, 'Sem ponto no mapa']]) {
+  if (!items.length) continue;
+  const button = addGalleryButton(items, label, '#memory-choices');
+  button.className = 'secondary memory-choice';
+  button.textContent = label + ' (' + items.length + ')';
+}
+
+$('#previous-memory').addEventListener('click', () => {
+  if (galleryIndex <= 0) return;
+  galleryIndex--;
+  showGalleryItem();
+});
+$('#next-memory').addEventListener('click', () => {
+  if (!currentGallery || galleryIndex >= currentGallery.length - 1) return;
+  galleryIndex++;
+  showGalleryItem();
 });
 
 $('#open-memories').addEventListener('click', () => {
