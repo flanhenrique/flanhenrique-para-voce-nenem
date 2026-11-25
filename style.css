@@ -103,55 +103,52 @@ h1 { font-size: clamp(2rem, 9vw, 4rem); color: var(--pink); letter-spacing: -.02
   background: #101d32;
 }
 .note-card p { margin: 0 auto 9px; }
-[data-state="note"] #controls { display: none; }
 @media (orientation: landscape) and (max-height: 500px) {
-  [data-state="note"] .stage { grid-column: 1 / -1; }
   .note-card {
     grid-template: minmax(0, 1fr) / minmax(0, 1fr) minmax(0, 1fr);
     align-items: center;
   }
 }
 #controls { text-align: center; }
-#controls p { margin: 0 0 7px; font-size: .875rem; }
-#joystick {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 90px;
-  width: clamp(74px, 14dvh, 106px);
-  aspect-ratio: 1;
-  margin: 0 auto;
-  border: 2px solid #678e9b;
-  border-radius: 50%;
-  background: radial-gradient(circle, #274758 0 45%, #1a3146 46% 67%, #152c40 68%);
-  box-shadow: 0 3px #101a2a, inset 0 0 0 3px #20394d;
+#controls p { margin: 0; font-size: .875rem; }
+#controls .touch-tip { margin-top: 3px; color: #b4d1d4; }
+#touch-field {
+  position: absolute;
+  inset: 0;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
   cursor: grab;
 }
-#joystick.engaged { cursor: grabbing; border-color: #ffdc91; }
+#touch-field:active { cursor: grabbing; }
+#joystick {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 92px;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border: 2px solid #efc779bb;
+  border-radius: 50%;
+  background: #12283c80;
+  box-shadow: 0 0 0 3px #101d3244;
+  pointer-events: none;
+}
 .stick-guide {
   position: absolute;
   inset: 14%;
-  display: grid;
-  place-items: center;
-  border: 1px dashed #678e9b;
+  border: 1px dashed #b4d1d490;
   border-radius: 50%;
-  color: #678e9b;
-  pointer-events: none;
 }
 #joystick-thumb {
-  width: 38%;
+  width: 34%;
   aspect-ratio: 1;
   border: 2px solid #ffe5b1;
   border-radius: 50%;
-  background: #efc779;
-  box-shadow: 0 3px #9b7543;
-  transition: transform .13s ease-out;
-  pointer-events: none;
+  background: #efc779d9;
+  box-shadow: 0 2px #9b7543;
 }
-#joystick.engaged #joystick-thumb { transition: none; }
 footer { font-size: .85rem; color: #b4d1d4; }
 html.playing, html.playing body { overflow: hidden; overscroll-behavior: none; }
 html.playing #app { height: 100vh; height: 100dvh; min-height: 0; }
@@ -165,10 +162,9 @@ html.playing #app { height: 100vh; height: 100dvh; min-height: 0; }
 .farewell { margin: 14px auto 18px; max-width: 30ch; line-height: 1.45; }
 @keyframes arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (orientation: landscape) and (max-height: 500px) {
-  html.playing #app { display: grid; grid-template: auto minmax(0, 1fr) / minmax(0, 1fr) auto; align-items: stretch; gap: 6px 12px; }
-  html.playing header { grid-column: 1 / -1; }
-  html.playing .stage { align-self: stretch; }
-  #controls { align-self: center; max-width: 132px; }
+  html.playing #app { gap: 6px; }
+  #controls p { display: inline; }
+  #controls .touch-tip { margin-left: 8px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; } }
 
@@ -223,6 +219,3 @@ html.playing #app { height: 100vh; height: 100dvh; min-height: 0; }
 .memory-pin { font-size: .95rem; }
 .memory-navigation { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
 .memory-navigation button:disabled { opacity: .55; cursor: default; }
-@media (prefers-reduced-motion: reduce) {
-  #joystick-thumb { transition: none; }
-}

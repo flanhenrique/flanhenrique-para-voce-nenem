@@ -21,9 +21,12 @@ const keyDirections = new Map([
   ['ArrowLeft', 'left'], ['a', 'left'], ['ArrowRight', 'right'], ['d', 'right'],
 ]);
 const input = new Map();
+const touchField = $('#touch-field');
 const joystick = $('#joystick');
 const joystickThumb = $('#joystick-thumb');
 let stickPointer = null;
+let stickOriginX = 0;
+let stickOriginY = 0;
 let stickX = 0;
 let stickY = 0;
 let state = 'intro';
@@ -262,7 +265,8 @@ function show(next) {
   $('#intro').hidden = next !== 'intro';
   $('#credit').hidden = next !== 'intro';
   $('#hud').hidden = next === 'intro' || next === 'ending';
-  $('#controls').hidden = next === 'intro' || next === 'ending';
+  $('#controls').hidden = next !== 'playing';
+  touchField.hidden = next !== 'playing';
   $('#note').hidden = next !== 'note';
   $('#ending').hidden = next !== 'ending';
   $('#audio').inert = next === 'note';
@@ -286,7 +290,7 @@ function start() {
   window.scrollTo(0, 0);
   show('playing');
   enableAudio();
-  joystick.focus({ preventScroll: true });
+  touchField.focus({ preventScroll: true });
 }
 
 function collect(h) {
@@ -384,41 +388,60 @@ function resetJoystick() {
   stickPointer = null;
   stickX = 0;
   stickY = 0;
-  joystick.classList.remove('engaged');
+  joystick.hidden = true;
   joystickThumb.style.transform = '';
-  if (pointer !== null && joystick.hasPointerCapture(pointer)) joystick.releasePointerCapture(pointer);
+  if (pointer !== null && touchField.hasPointerCapture(pointer)) touchField.releasePointerCapture(pointer);
+}
+
+function positionJoystick() {
+  const bounds = touchField.getBoundingClientRect();
+  const radius = joystick.offsetWidth / 2;
+  const x = Math.max(radius, Math.min(bounds.width - radius, stickOriginX - bounds.left));
+  const y = Math.max(radius, Math.min(bounds.height - radius, stickOriginY - bounds.top));
+  joystick.style.left = x + 'px';
+  joystick.style.top = y + 'px';
 }
 
 function moveJoystick(event) {
-  const bounds = joystick.getBoundingClientRect();
-  const dx = event.clientX - bounds.left - bounds.width / 2;
-  const dy = event.clientY - bounds.top - bounds.height / 2;
+  const dx = event.clientX - stickOriginX;
+  const dy = event.clientY - stickOriginY;
   const distance = Math.hypot(dx, dy);
-  const travel = bounds.width * 0.29;
-  const deadZone = travel * 0.18;
-  const strength = Math.min(1, Math.max(0, (distance - deadZone) / (travel - deadZone)));
+  const travel = 29;
+  const deadZone = 3;
   const directionX = distance ? dx / distance : 0;
   const directionY = distance ? dy / distance : 0;
+  const push = Math.min(1, (distance - deadZone) / (travel - deadZone));
+  const strength = push > 0 ? .22 + .78 * push : 0;
   stickX = directionX * strength;
   stickY = directionY * strength;
+
+  // Follow a long swipe so a small correction can turn the character back.
+  if (distance > travel) {
+    stickOriginX = event.clientX - directionX * travel;
+    stickOriginY = event.clientY - directionY * travel;
+    positionJoystick();
+  }
   const reach = Math.min(distance, travel);
   joystickThumb.style.transform = 'translate(' + directionX * reach + 'px, ' + directionY * reach + 'px)';
 }
 
-joystick.addEventListener('pointerdown', event => {
+touchField.addEventListener('pointerdown', event => {
   if (state !== 'playing' || stickPointer !== null || event.button !== 0) return;
   event.preventDefault();
   stickPointer = event.pointerId;
-  joystick.setPointerCapture(stickPointer);
-  joystick.classList.add('engaged');
-  moveJoystick(event);
+  stickOriginX = event.clientX;
+  stickOriginY = event.clientY;
+  touchField.setPointerCapture(stickPointer);
+  joystick.hidden = false;
+  positionJoystick();
   enableAudio();
 });
-joystick.addEventListener('pointermove', event => {
+touchField.addEventListener('pointermove', event => {
   if (event.pointerId === stickPointer) moveJoystick(event);
 });
+touchField.addEventListener('contextmenu', event => event.preventDefault());
 for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) {
-  joystick.addEventListener(name, event => {
+  touchField.addEventListener(name, event => {
     if (event.pointerId === stickPointer) resetJoystick();
   });
 }
@@ -541,7 +564,7 @@ $('#start').addEventListener('click', start);
 $('#replay').addEventListener('click', start);
 $('#continue').addEventListener('click', () => {
   show('playing');
-  joystick.focus({ preventScroll: true });
+  touchField.focus({ preventScroll: true });
   enableAudio();
 });
 $('#audio').addEventListener('click', (event) => {
