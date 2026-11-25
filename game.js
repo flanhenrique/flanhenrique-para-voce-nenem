@@ -396,6 +396,8 @@ for (const button of buttons) {
     input.set(event.pointerId, button.dataset.dir);
     button.classList.add('held');
     enableAudio();
+    // A quick tap can begin and end between animation frames.
+    update(0.055);
   });
   for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) {
     button.addEventListener(name, event => {
@@ -593,7 +595,8 @@ function updateChapterProgress() {
 
 function beginChapter(id) {
   resetMemoryGallery();
-  resetAlbum();
+  albumVideos.forEach(video => video.pause());
+  updateAlbumSelection();
   $('#map-memory').hidden = true;
   chapterRun = { id, index: 0 };
   player.x = 160;
