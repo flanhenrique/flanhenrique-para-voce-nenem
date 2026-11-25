@@ -46,7 +46,7 @@ header {
 .meter, .farewell { font-family: ui-monospace, monospace; }
 .brand { display: flex; align-items: center; gap: 8px; font-weight: bold; }
 .brand img { width: 20px; height: 20px; image-rendering: pixelated; }
-#audio {
+#audio, .pad button {
   border: 1px solid #678e9b;
   background: #20394d;
   color: var(--cream);
@@ -80,7 +80,7 @@ header {
 h1 { font-size: clamp(2rem, 9vw, 4rem); color: var(--pink); letter-spacing: -.025em; margin: 0; line-height: 1.02; text-shadow: 3px 3px #69563c; }
 .title-card p, .note-card p { line-height: 1.5; margin: 14px auto 20px; max-width: 29ch; }
 .primary { border: 2px solid #ffe5b1; color: #30291d; font-weight: 750; background: #efc779; padding: 10px 14px; min-height: 44px; box-shadow: 0 4px #9b7543; }
-.primary:active { transform: translateY(2px); box-shadow: 0 1px #0d1b2e; }
+.primary:active, .pad button:active, .pad button.held { transform: translateY(2px); box-shadow: 0 1px #0d1b2e; }
 #hud { position: absolute; top: 7px; left: 7px; background: #101d32ef; padding: 5px 8px; border: 1px solid #658393; display: flex; align-items: center; gap: 9px; font-size: .875rem; }
 .meter { color: #efc779; font-size: 1.15rem; }
 #note { background: #101d32b3; }
@@ -103,52 +103,29 @@ h1 { font-size: clamp(2rem, 9vw, 4rem); color: var(--pink); letter-spacing: -.02
   background: #101d32;
 }
 .note-card p { margin: 0 auto 9px; }
+[data-state="note"] #controls { display: none; }
 @media (orientation: landscape) and (max-height: 500px) {
+  [data-state="note"] .stage { grid-column: 1 / -1; }
   .note-card {
     grid-template: minmax(0, 1fr) / minmax(0, 1fr) minmax(0, 1fr);
     align-items: center;
   }
 }
 #controls { text-align: center; }
-#controls p { margin: 0; font-size: .875rem; }
-#controls .touch-tip { margin-top: 3px; color: #b4d1d4; }
-#touch-field {
-  position: absolute;
-  inset: 0;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-  cursor: grab;
+#controls p { margin: 0 0 7px; font-size: .875rem; }
+.pad { display: flex; justify-content: center; gap: 8px; touch-action: none; user-select: none; -webkit-user-select: none; }
+.pad button { width: clamp(48px, 14vw, 64px); height: 49px; touch-action: none; display: grid; place-items: center; }
+.pad button::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border: 7px solid transparent;
+  border-top: 0;
+  border-bottom: 10px solid var(--cream);
 }
-#touch-field:active { cursor: grabbing; }
-#joystick {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  width: 92px;
-  aspect-ratio: 1;
-  translate: -50% -50%;
-  border: 2px solid #efc779bb;
-  border-radius: 50%;
-  background: #12283c80;
-  box-shadow: 0 0 0 3px #101d3244;
-  pointer-events: none;
-}
-.stick-guide {
-  position: absolute;
-  inset: 14%;
-  border: 1px dashed #b4d1d490;
-  border-radius: 50%;
-}
-#joystick-thumb {
-  width: 34%;
-  aspect-ratio: 1;
-  border: 2px solid #ffe5b1;
-  border-radius: 50%;
-  background: #efc779d9;
-  box-shadow: 0 2px #9b7543;
-}
+.pad button[data-dir="left"]::before { transform: rotate(-90deg); }
+.pad button[data-dir="right"]::before { transform: rotate(90deg); }
+.pad button[data-dir="down"]::before { transform: rotate(180deg); }
 footer { font-size: .85rem; color: #b4d1d4; }
 html.playing, html.playing body { overflow: hidden; overscroll-behavior: none; }
 html.playing #app { height: 100vh; height: 100dvh; min-height: 0; }
@@ -162,9 +139,12 @@ html.playing #app { height: 100vh; height: 100dvh; min-height: 0; }
 .farewell { margin: 14px auto 18px; max-width: 30ch; line-height: 1.45; }
 @keyframes arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (orientation: landscape) and (max-height: 500px) {
-  html.playing #app { gap: 6px; }
-  #controls p { display: inline; }
-  #controls .touch-tip { margin-left: 8px; }
+  html.playing #app { display: grid; grid-template: auto minmax(0, 1fr) / minmax(0, 1fr) auto; align-items: stretch; gap: 6px 12px; }
+  html.playing header { grid-column: 1 / -1; }
+  html.playing .stage { align-self: stretch; }
+  #controls { align-self: center; max-width: 132px; }
+  .pad { display: grid; grid-template-columns: repeat(2, auto); }
+  .pad button { height: 44px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; } }
 

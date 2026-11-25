@@ -21,14 +21,7 @@ const keyDirections = new Map([
   ['ArrowLeft', 'left'], ['a', 'left'], ['ArrowRight', 'right'], ['d', 'right'],
 ]);
 const input = new Map();
-const touchField = $('#touch-field');
-const joystick = $('#joystick');
-const joystickThumb = $('#joystick-thumb');
-let stickPointer = null;
-let stickOriginX = 0;
-let stickOriginY = 0;
-let stickX = 0;
-let stickY = 0;
+const buttons = [...document.querySelectorAll('[data-dir]')];
 let state = 'intro';
 let particles = [];
 let meeting = 0;
@@ -254,7 +247,7 @@ function drawFinale(time) {
 
 function clearInput() {
   input.clear();
-  resetJoystick();
+  buttons.forEach(button => button.classList.remove('held'));
   moving = false;
 }
 
@@ -265,10 +258,10 @@ function show(next) {
   $('#intro').hidden = next !== 'intro';
   $('#credit').hidden = next !== 'intro';
   $('#hud').hidden = next === 'intro' || next === 'ending';
-  $('#controls').hidden = next !== 'playing';
-  touchField.hidden = next !== 'playing';
+  $('#controls').hidden = next === 'intro' || next === 'ending';
   $('#note').hidden = next !== 'note';
   $('#ending').hidden = next !== 'ending';
+  buttons.forEach(button => { button.disabled = next !== 'playing'; });
   $('#audio').inert = next === 'note';
   clearInput();
 }
@@ -290,7 +283,7 @@ function start() {
   window.scrollTo(0, 0);
   show('playing');
   enableAudio();
-  touchField.focus({ preventScroll: true });
+  buttons[0].focus({ preventScroll: true });
 }
 
 function collect(h) {
@@ -316,13 +309,11 @@ function valid(x, y) {
 
 function update(dt) {
   const directions = new Set(input.values());
-  const keyX = Number(directions.has('right')) - Number(directions.has('left'));
-  const keyY = Number(directions.has('down')) - Number(directions.has('up'));
-  const dx = keyX || keyY ? keyX : stickX;
-  const dy = keyX || keyY ? keyY : stickY;
+  const dx = Number(directions.has('right')) - Number(directions.has('left'));
+  const dy = Number(directions.has('down')) - Number(directions.has('up'));
   moving = Boolean(dx || dy);
   if (!moving) return;
-  const distance = 81 * dt / Math.max(1, Math.hypot(dx, dy));
+  const distance = 81 * dt / (Math.hypot(dx, dy) || 1);
   if (valid(player.x + dx * distance, player.y)) player.x += dx * distance;
   if (valid(player.x, player.y + dy * distance)) player.y += dy * distance;
   const found = hearts.find(h => !h.taken && Math.hypot(h.x - player.x, h.y - player.y) < 12);
@@ -383,69 +374,22 @@ document.addEventListener('visibilitychange', () => {
   } else if (audio && !muted && state !== 'intro') enableAudio();
 });
 
-function resetJoystick() {
-  const pointer = stickPointer;
-  stickPointer = null;
-  stickX = 0;
-  stickY = 0;
-  joystick.hidden = true;
-  joystickThumb.style.transform = '';
-  if (pointer !== null && touchField.hasPointerCapture(pointer)) touchField.releasePointerCapture(pointer);
-}
-
-function positionJoystick() {
-  const bounds = touchField.getBoundingClientRect();
-  const radius = joystick.offsetWidth / 2;
-  const x = Math.max(radius, Math.min(bounds.width - radius, stickOriginX - bounds.left));
-  const y = Math.max(radius, Math.min(bounds.height - radius, stickOriginY - bounds.top));
-  joystick.style.left = x + 'px';
-  joystick.style.top = y + 'px';
-}
-
-function moveJoystick(event) {
-  const dx = event.clientX - stickOriginX;
-  const dy = event.clientY - stickOriginY;
-  const distance = Math.hypot(dx, dy);
-  const travel = 29;
-  const deadZone = 3;
-  const directionX = distance ? dx / distance : 0;
-  const directionY = distance ? dy / distance : 0;
-  const push = Math.min(1, (distance - deadZone) / (travel - deadZone));
-  const strength = push > 0 ? .22 + .78 * push : 0;
-  stickX = directionX * strength;
-  stickY = directionY * strength;
-
-  // Follow a long swipe so a small correction can turn the character back.
-  if (distance > travel) {
-    stickOriginX = event.clientX - directionX * travel;
-    stickOriginY = event.clientY - directionY * travel;
-    positionJoystick();
-  }
-  const reach = Math.min(distance, travel);
-  joystickThumb.style.transform = 'translate(' + directionX * reach + 'px, ' + directionY * reach + 'px)';
-}
-
-touchField.addEventListener('pointerdown', event => {
-  if (state !== 'playing' || stickPointer !== null || event.button !== 0) return;
-  event.preventDefault();
-  stickPointer = event.pointerId;
-  stickOriginX = event.clientX;
-  stickOriginY = event.clientY;
-  touchField.setPointerCapture(stickPointer);
-  joystick.hidden = false;
-  positionJoystick();
-  enableAudio();
-});
-touchField.addEventListener('pointermove', event => {
-  if (event.pointerId === stickPointer) moveJoystick(event);
-});
-touchField.addEventListener('contextmenu', event => event.preventDefault());
-for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) {
-  touchField.addEventListener(name, event => {
-    if (event.pointerId === stickPointer) resetJoystick();
+for (const button of buttons) {
+  button.addEventListener('pointerdown', event => {
+    if (state !== 'playing' || event.button !== 0) return;
+    event.preventDefault();
+    button.setPointerCapture(event.pointerId);
+    input.set(event.pointerId, button.dataset.dir);
+    button.classList.add('held');
+    enableAudio();
   });
+  for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+    button.addEventListener(name, event => {
+      input.delete(event.pointerId);
+      if (![...input.values()].includes(button.dataset.dir)) button.classList.remove('held');
+    });
+  }
 }
-
 // Keep the five memories from the original adventure at their known locations.
 const originalLocations = [[53.775, 43.393], [62.039, 73.585], [70.082, 45.797],
   [49.315, 61.760], [70.556, 46.385]];
@@ -564,7 +508,7 @@ $('#start').addEventListener('click', start);
 $('#replay').addEventListener('click', start);
 $('#continue').addEventListener('click', () => {
   show('playing');
-  touchField.focus({ preventScroll: true });
+  buttons[0].focus({ preventScroll: true });
   enableAudio();
 });
 $('#audio').addEventListener('click', (event) => {

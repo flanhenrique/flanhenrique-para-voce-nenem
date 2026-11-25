@@ -39,12 +39,6 @@
       <span class="meter" aria-hidden="true">♡ ♡ ♡ ♡ ♡</span>
       <span id="count" aria-live="polite">0 / 5</span>
     </div>
-    <div id="touch-field" role="group" tabindex="-1" aria-label="Controles do jardim" aria-describedby="move-tip" hidden>
-      <div id="joystick" aria-hidden="true" hidden>
-        <span class="stick-guide"></span>
-        <span id="joystick-thumb"></span>
-      </div>
-    </div>
     <div id="note" class="overlay" role="dialog" aria-modal="true" aria-labelledby="message" hidden>
       <div class="note-card">
         <img id="memory-photo" alt="">
@@ -57,7 +51,12 @@
   </div>
   <section id="controls" hidden aria-label="Controles do jogo">
     <p id="hint">Encontre os cinco corações no jardim.</p>
-    <p class="touch-tip" id="move-tip">Toque no jardim e arraste para andar.</p>
+    <div class="pad" role="group" aria-label="Direções">
+      <button data-dir="left" aria-label="Esquerda"></button>
+      <button data-dir="up" aria-label="Cima"></button>
+      <button data-dir="down" aria-label="Baixo"></button>
+      <button data-dir="right" aria-label="Direita"></button>
+    </div>
   </section>
   <footer id="credit">Feito com carinho por Henrique</footer>
   <section id="ending" hidden>
