@@ -73,15 +73,17 @@
     <button class="secondary" id="replay">Jogar novamente</button>
     <section id="memories" hidden aria-labelledby="memories-title">
       <h2 id="memories-title" tabindex="-1">Nós dois em Manaus</h2>
-      <p>Toque em um coração para abrir uma lembrança.</p>
+      <p>Toque em um ponto do mapa ou escolha uma foto.</p>
       <div class="memory-map">
-        <canvas id="city-map" width="480" height="300" aria-label="Mapa ilustrado de Manaus à margem do Rio Negro"></canvas>
+        <img id="city-map" src="manaus.png" width="240" height="236" loading="lazy" alt="Mapa de Manaus em pixel art, com ruas reais e o Rio Negro">
         <div id="memory-pins" role="group" aria-label="Escolher lembrança"></div>
       </div>
-      <p class="map-caption">Mapa ilustrativo. Os corações representam memórias.</p>
+      <div id="memory-choices" role="group" aria-label="Escolher uma das cinco fotos"></div>
+      <p class="map-caption">Quatro pontos vêm do GPS das fotos. A foto 02 marca o Teatro Amazonas. O ponto duplo reúne as fotos 03 e 05.</p>
+      <p class="map-caption">Mapa © <a href="https://www.openstreetmap.org/copyright">colaboradores do OpenStreetMap</a>, via <a href="https://openfreemap.org/">OpenFreeMap</a>.</p>
       <figure id="map-memory" hidden>
         <img id="map-photo" alt="">
-        <figcaption id="map-message" aria-live="polite"></figcaption>
+        <figcaption aria-live="polite"><span id="map-place"></span><p id="map-message"></p></figcaption>
       </figure>
     </section>
   </section>

@@ -169,7 +169,7 @@ html.playing #app { height: 100vh; height: 100dvh; min-height: 0; }
   border: 2px solid #678e9b;
   overflow: hidden;
 }
-#city-map { display: block; width: 100%; height: auto; }
+#city-map { display: block; width: 100%; height: auto; image-rendering: pixelated; }
 .memory-pin {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -188,3 +188,9 @@ html.playing #app { height: 100vh; height: 100dvh; min-height: 0; }
 #map-memory { margin: 18px 0 0; padding: 12px; background: #101d32; }
 #map-photo { display: block; width: 100%; height: min(56vh, 28rem); object-fit: contain; }
 #map-message { max-width: 32ch; margin: 10px auto 0; line-height: 1.5; }
+
+
+#memory-choices { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin: 12px 0; }
+.memory-choice[aria-pressed="true"] { background: #ffdc91; color: #30291d; }
+.map-caption a { color: inherit; }
+#map-place { display: block; font-weight: 700; margin-top: 8px; }
